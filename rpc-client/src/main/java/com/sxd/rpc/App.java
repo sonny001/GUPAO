@@ -13,5 +13,10 @@ public class App
 
         String result = iHelloWorldService.hello("SXD");
         System.out.println(result);
+
+        User user = new User();
+        user.setAge(18);
+        user.setName("sonny");
+        iHelloWorldService.saveUser(user);
     }
 }

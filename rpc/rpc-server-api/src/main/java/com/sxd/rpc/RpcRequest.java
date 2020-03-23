@@ -41,4 +41,12 @@ public class RpcRequest implements Serializable {
         this.parameters = parameters;
     }
 
+    @Override
+    public String toString() {
+        return "RpcRequest{" +
+                "className='" + className + '\'' +
+                ", methodName='" + methodName + '\'' +
+                ", parameters=" + Arrays.toString(parameters) +
+                '}';
+    }
 }
