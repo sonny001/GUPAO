@@ -1,7 +1,8 @@
 package com.sxd.rpc;
 
-import com.sxd.rpc.imple.IHelloWorldServiceImpl;
-import com.sxd.rpc.imple.RpcProxyServer;
+import com.sxd.rpc.core.SpringConfig;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 /**
  * Hello world!
@@ -11,9 +12,9 @@ public class App
 {
     public static void main( String[] args )
     {
-        IHelloWorldService iHelloWorldService = new IHelloWorldServiceImpl();
-        RpcProxyServer rpcProxyServer = new RpcProxyServer();
 
-        rpcProxyServer.publisher(iHelloWorldService,8080);
+        ApplicationContext applicationContext = new AnnotationConfigApplicationContext(SpringConfig.class);
+
+        ((AnnotationConfigApplicationContext)applicationContext).start();
     }
 }

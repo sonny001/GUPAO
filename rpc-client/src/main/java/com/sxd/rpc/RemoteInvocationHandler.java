@@ -27,6 +27,7 @@ public class RemoteInvocationHandler implements InvocationHandler {
         rpcRequest.setClassName(method.getDeclaringClass().getName());
         rpcRequest.setMethodName(method.getName());
         rpcRequest.setParameters(args);
+        rpcRequest.setVersion("2.0");
         System.out.println(rpcRequest.toString());
 
         RpcNetTransport rpcNetTransport = new RpcNetTransport(host, port);

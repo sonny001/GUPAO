@@ -1,6 +1,7 @@
 package com.sxd.rpc.imple;
 
 import com.sxd.rpc.RpcRequest;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -8,6 +9,7 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.Socket;
+import java.util.Map;
 
 /**
  * @program rpc-server
@@ -18,11 +20,11 @@ import java.net.Socket;
 public class ProcesserHandler implements Runnable {
 
     private Socket socket;
-    private Object service;
+    private Map<String, Object> handlerMap;
 
-    public ProcesserHandler(Socket socket, Object service) {
+    public ProcesserHandler(Socket socket, Map<String, Object> handlerMap) {
         this.socket = socket;
-        this.service = service;
+        this.handlerMap = handlerMap;
     }
 
     /**
@@ -60,7 +62,7 @@ public class ProcesserHandler implements Runnable {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             if (null != objectInputStream) {
                 try {
                     objectInputStream.close();
@@ -81,15 +83,33 @@ public class ProcesserHandler implements Runnable {
     }
 
     private Object handler(RpcRequest rpcRequest) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        //反射调用方法
-        Object[] args = rpcRequest.getParameters();
-        Class<?>[] types = new Class[args.length];
-        for (int i = 0; i < args.length; i++) {
-            types[i] = args[i].getClass();
+        String serviceName = rpcRequest.getClassName();
+        String version = rpcRequest.getVersion();
+        if (!StringUtils.isEmpty(version)) {
+            serviceName += "-" + version;
         }
 
-        Class clazz = Class.forName(rpcRequest.getClassName());
-        Method method = clazz.getMethod(rpcRequest.getMethodName(), types);
+        Object service = handlerMap.get(serviceName);
+        if (null == service) {
+            throw new RuntimeException("serviceBean is null" + serviceName);
+        }
+
+        //反射调用方法
+        Object[] args = rpcRequest.getParameters();
+        Method method = null;
+        if (null != args) {
+            Class<?>[] types = new Class[args.length];
+            for (int i = 0; i < args.length; i++) {
+                types[i] = args[i].getClass();
+            }
+
+            Class clazz = Class.forName(rpcRequest.getClassName());
+            method = clazz.getMethod(rpcRequest.getMethodName(), types);
+        } else {
+            Class clazz = Class.forName(rpcRequest.getClassName());
+            method = clazz.getMethod(rpcRequest.getMethodName());
+        }
+
         return method.invoke(service, args);
     }
 }
